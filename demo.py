@@ -1,12 +1,8 @@
-# Start by making sure the `assemblyai` (1.5.4) and `pyaudio` packages are installed.
-# If not, you can install them by running the following command:
-# pip install assemblyai==1.5.4 pyaudio
-#
-# Note: Some macOS users may need to use `pip3` instead of `pip`.
-
 import logging
+import os
 
 import pyaudio
+from dotenv import load_dotenv
 from assemblyai.streaming.v3 import (
     BeginEvent,
     RealTimeError,
@@ -18,8 +14,8 @@ from assemblyai.streaming.v3 import (
     TurnEvent,
 )
 
-# Replace with your chosen API key, this is the "default" account api key
-api_key = "87cac9e2747a48dc93518a73a25224ba"
+load_dotenv()
+api_key = os.getenv("ASSEMBLYAI_API_KEY")
 
 # The SDK does not capture audio itself: pyaudio reads 16-bit mono PCM from the
 # default microphone and the chunks are handed to the transcriber below.
@@ -61,6 +57,11 @@ def microphone_stream():
         audio.terminate()
 
 def main():
+    if not api_key:
+        raise RuntimeError(
+            "ASSEMBLYAI_API_KEY is not set. Add it to a .env file or the environment."
+        )
+
     client = RealTimeTranscriber(
         RealTimeTranscriberOptions(
             api_key=api_key,
